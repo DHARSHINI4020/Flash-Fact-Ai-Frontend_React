@@ -1,19 +1,29 @@
 import React from "react";
-import { useParams, Link } from "react-router-dom";
-import { Typography, Button } from "@mui/material";
+import { useParams } from "react-router-dom";
 
 const ArticleDetail = ({ articles }) => {
   const { id } = useParams();
-  const article = articles.find((a) => a.id === parseInt(id));
+  const article = articles.find(a => a.id === parseInt(id));
 
-  if (!article) return <Typography align="center" sx={{ mt: 10 }}>Article not found</Typography>;
+  if (!article) return <p>Article not found</p>;
 
   return (
     <div style={{ maxWidth: "800px", margin: "auto", padding: "20px" }}>
-      <Typography variant="h3" gutterBottom>{article.title}</Typography>
-      <img src={article.image} alt={article.title} style={{ width: "100%", marginBottom: "20px" }} />
-      <Typography variant="body1" paragraph>{article.content}</Typography>
-      <Button component={Link} to="/" variant="contained">Back to News</Button>
+      <h1>{article.title}</h1>
+      <p>{article.description}</p>
+
+      {article.mediaType === "video" && (
+        <video width="100%" controls>
+          <source src={article.mediaUrl} type="video/mp4" />
+        </video>
+      )}
+      {article.mediaType === "audio" && (
+        <audio controls>
+          <source src={article.mediaUrl} type="audio/mpeg" />
+        </audio>
+      )}
+
+      <p>{article.content}</p>
     </div>
   );
 };
