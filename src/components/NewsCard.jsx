@@ -1,13 +1,26 @@
-function NewsCard({ title, description, url }) {
-  return (
-    <div className="bg-white rounded-lg shadow-md p-4 mb-4 hover:shadow-lg transition-shadow">
-      <h2 className="text-xl font-bold mb-2">{title}</h2>
-      <p className="text-gray-700 mb-2">{description}</p>
-      <a href={url} className="text-blue-600 hover:underline" target="_blank" rel="noreferrer">
-        Read more
-      </a>
-    </div>
-  )
-}
+import React from "react";
+import { Card, CardMedia, CardContent, Typography, CardActionArea } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
-export default NewsCard
+const NewsCard = ({ article }) => {
+  const navigate = useNavigate();
+
+  return (
+    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <CardActionArea
+        onClick={() => navigate(`/article/${article.id}`)}
+        sx={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "stretch" }}
+      >
+        <CardMedia component="img" height="140" image={article.image} alt={article.title} />
+        <CardContent sx={{ flexGrow: 1 }}>
+          <Typography variant="h6">{article.title}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {article.description}
+          </Typography>
+        </CardContent>
+      </CardActionArea>
+    </Card>
+  );
+};
+
+export default NewsCard;
