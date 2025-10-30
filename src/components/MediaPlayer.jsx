@@ -1,28 +1,31 @@
-// src/components/MediaPlayer.jsx
 import React from "react";
+import { Typography } from "@mui/material";
 
-const MediaPlayer = ({ mediaUrl, type }) => {
-  if (!mediaUrl) return null;
+const HighlightedText = ({ text, highlight }) => {
+  if (!highlight) return <>{text}</>;
+
+  // Split the text by matched parts (case-insensitive)
+  const parts = text.split(new RegExp(`(${highlight})`, "gi"));
 
   return (
-    <div style={{ marginTop: "10px" }}>
-      {type === "video" ? (
-        <video
-          width="100%"
-          height="auto"
-          controls
-          src={mediaUrl}
-          style={{ borderRadius: "8px" }}
-        >
-          Your browser does not support the video tag.
-        </video>
-      ) : type === "audio" ? (
-        <audio controls src={mediaUrl} style={{ width: "100%" }}>
-          Your browser does not support the audio tag.
-        </audio>
-      ) : null}
-    </div>
+    <Typography component="span">
+      {parts.map((part, index) =>
+        part.toLowerCase() === highlight.toLowerCase() ? (
+          <span
+            key={index}
+            style={{
+              backgroundColor: "#ffff00", // yellow highlight
+              fontWeight: "bold",
+            }}
+          >
+            {part}
+          </span>
+        ) : (
+          <span key={index}>{part}</span>
+        )
+      )}
+    </Typography>
   );
 };
 
-export default MediaPlayer;
+export default HighlightedText;

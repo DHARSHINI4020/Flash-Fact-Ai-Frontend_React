@@ -4,6 +4,14 @@ import NewsGrid from "./components/NewsGrid";
 import ArticleDetail from "./components/ArticleDetail";
 import SavedArticles from "./components/SavedArticles";
 import Header from "./components/Header";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
+import useMockRealtimeAlerts from "./hooks/useMockRealtimeAlerts";
+
+import { ToastContainer } from "react-toastify";   // ✅ Add this import
+import "react-toastify/dist/ReactToastify.css"; 
+
 const mockArticles = [
   {
     id: 1,
@@ -45,6 +53,7 @@ const mockArticles = [
 ];
 
 function App() {
+   useMockRealtimeAlerts(); // ✅ activate fake realtime notifications
   return (
     <>
       <Header />
@@ -52,7 +61,11 @@ function App() {
         <Route path="/" element={<NewsGrid articles={mockArticles} />} />
         <Route path="/article/:id" element={<ArticleDetail articles={mockArticles} />} />
         <Route path="/saved" element={<SavedArticles />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
+       
     </>
   );
 }

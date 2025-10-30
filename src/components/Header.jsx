@@ -1,15 +1,29 @@
 import React from "react";
 import { AppBar, Toolbar, Typography, Button } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user")); // Check if logged in
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
-    <AppBar position="static">
+    <AppBar position="static" color="primary">
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="h6">
+        {/* Logo / Title */}
+        <Typography
+          variant="h6"
+          sx={{ cursor: "pointer" }}
+          onClick={() => navigate("/")}
+        >
           FlashFact AI
         </Typography>
 
+        {/* Navigation Buttons */}
         <div>
           <Button color="inherit" component={Link} to="/">
             Home
@@ -17,6 +31,22 @@ const Header = () => {
           <Button color="inherit" component={Link} to="/saved">
             Saved Articles
           </Button>
+
+          {/* Conditional rendering based on login */}
+          {!user ? (
+            <Button color="inherit" component={Link} to="/login">
+              Login
+            </Button>
+          ) : (
+            <>
+              <Button color="inherit" component={Link} to="/profile">
+                {user.username || "Profile"}
+              </Button>
+              <Button color="inherit" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          )}
         </div>
       </Toolbar>
     </AppBar>

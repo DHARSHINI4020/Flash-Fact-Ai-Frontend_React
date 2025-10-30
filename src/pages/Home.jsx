@@ -1,8 +1,10 @@
 import React from "react";
 import NewsCard from "../components/NewsCard";
 import SearchBar from "../components/SearchBar";
+import { toast } from "react-toastify";   
 
 export default function Home() {
+
   const mockNews = [
     { 
       title: "React 19 Released!", 
@@ -18,9 +20,21 @@ export default function Home() {
     },
   ];
 
+  const handleSaveNews = () => {
+    toast.success("Test Toast Works");
+  };
+
   return (
     <div className="p-4 max-w-4xl mx-auto">
       <SearchBar placeholder="Search news..." />
+
+      <button
+        onClick={handleSaveNews}
+        className="bg-blue-600 text-white px-3 py-2 rounded mt-3"
+      >
+        Save News
+      </button>
+
       {mockNews.map((news, index) => (
         <NewsCard
           key={index}
