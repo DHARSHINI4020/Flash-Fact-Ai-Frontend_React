@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import NewsGrid from "./components/NewsGrid";
 import ArticleDetail from "./components/ArticleDetail";
 import SavedArticles from "./components/SavedArticles";
@@ -7,65 +7,124 @@ import Header from "./components/Header";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
-import useMockRealtimeAlerts from "./hooks/useMockRealtimeAlerts";
-
-import { ToastContainer } from "react-toastify";   // ✅ Add this import
-import "react-toastify/dist/ReactToastify.css"; 
-
-const mockArticles = [
-  {
-    id: 1,
-    title: "React 20 Released!",
-    description: "React 20 comes with amazing new features.",
-    image: "https://via.placeholder.com/300x180?text=React+20",
-    content: "Full details about React 20 with all new features, updates, and examples.",
-    mediaUrl: "https://www.w3schools.com/html/mov_bbb.mp4", // example video
-    mediaType: "video",
-  },
-  {
-    id: 2,
-    title: "AI Revolution",
-    description: "AI is transforming industries rapidly.",
-    image: "https://via.placeholder.com/300x180?text=AI+Revolution",
-    content: "Full details about AI Revolution, applications in industry and research.",
-    mediaUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // example audio
-    mediaType: "audio",
-  },
-  {
-    id: 3,
-    title: "SpaceX Launch",
-    description: "SpaceX successfully launched a new satellite.",
-    image: "https://via.placeholder.com/300x180?text=SpaceX+Launch",
-    content: "Full details about SpaceX's latest launch and satellite info.",
-    mediaUrl: "https://www.w3schools.com/html/movie.mp4", // example video
-    mediaType: "video",
-  },
-  {
-    id: 4,
-    title: "Climate Change Update",
-    description: "Global climate reports show rising temperatures.",
-    image: "https://via.placeholder.com/300x180?text=Climate+Change",
-    content: "Full report on climate change, data, and impacts worldwide.",
-    mediaUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", // example audio
-    mediaType: "audio",
-  },
-  // Add more articles as needed
-];
+import useMockRealtimeAlerts from "./hooks/useRealtimeArticleAlerts";
+import { getAllNews } from "./api/api";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useTheme, Box, Typography, CircularProgress } from "@mui/material";
 
 function App() {
-   useMockRealtimeAlerts(); // ✅ activate fake realtime notifications
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const theme = useTheme(); // 🎨 Access the current theme
+  useMockRealtimeAlerts();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getAllNews();
+
+        // ✅ Backend returns { data: [...], pagination: {...} }
+        const raw = res.data?.data || [];
+
+        // ✅ Normalize backend data for frontend
+        const formatted = raw.map((a) => ({
+          id: a._id || a.id,
+          title: a.title || "Untitled",
+          description: a.summary || a.content?.slice(0, 120) || "",
+          image:
+            a.image ||
+            "https://via.placeholder.com/300x180?text=FlashFact+AI",
+          mediaUrl: a.videoUrl || a.voiceUrl || null,
+          mediaType: a.videoUrl ? "video" : a.voiceUrl ? "audio" : null,
+          content: a.content || "",
+          category: a.category || "general",
+          author: a.author || "Unknown",
+          source: a.source || "FlashFact AI",
+          sentiment: a.sentiment || "neutral",
+          factCheckStatus: a.factCheckStatus || "pending",
+          publishedAt: a.publishedAt,
+        }));
+
+        console.log("✅ Loaded articles:", formatted);
+        setArticles(formatted);
+      } catch (error) {
+        console.error("❌ Error fetching news:", error);
+        toast.error("Failed to fetch news from backend");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <>
       <Header />
-      <Routes>
-        <Route path="/" element={<NewsGrid articles={mockArticles} />} />
-        <Route path="/article/:id" element={<ArticleDetail articles={mockArticles} />} />
-        <Route path="/saved" element={<SavedArticles />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/profile" element={<Profile />} />
-      </Routes>
-       
+
+      {loading ? (
+        <Box
+          sx={{
+            textAlign: "center",
+            mt: 10,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            color:
+              theme.palette.mode === "dark"
+                ? theme.palette.grey[300]
+                : theme.palette.text.secondary,
+          }}
+        >
+          <CircularProgress
+            size={32}
+            sx={{
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.primary.light
+                  : theme.palette.primary.main,
+            }}
+          />
+          <Typography
+            variant="body1"
+            sx={{
+              color:
+                theme.palette.mode === "dark"
+                  ? theme.palette.grey[300]
+                  : theme.palette.text.secondary,
+            }}
+          >
+            Loading news...
+          </Typography>
+        </Box>
+      ) : (
+        <Routes>
+          <Route path="/" element={<NewsGrid articles={articles} />} />
+          <Route
+            path="/article/:id"
+            element={<ArticleDetail articles={articles} />}
+          />
+          <Route path="/saved" element={<SavedArticles />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+      )}
+
+      {/* ✅ Toast Notifications */}
+      <ToastContainer
+        position="top-center"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={theme.palette.mode === "dark" ? "dark" : "light"} // adapts toast theme
+      />
     </>
   );
 }
